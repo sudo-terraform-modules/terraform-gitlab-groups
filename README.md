@@ -346,7 +346,7 @@ When using this module in production:
 
 ## License
 
-This module is licensed under the MIT License. See [LICENSE](./LICENSE) file for details.
+This module is licensed under the Apache 2.0 License. See [LICENSE](./LICENSE) file for details.
 
 ## Changelog
 
