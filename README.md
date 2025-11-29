@@ -1,6 +1,6 @@
 # GitLab Groups Terraform Module
 
-<img src="https://github.com/user-attachments/assets/a09f3eff-3e08-4a3c-b490-71117a40080b" width="460" height="90"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="460" height="100" alt="image" src="https://github.com/user-attachments/assets/4ac93e8c-4848-472e-ae13-2bd858811b48" />
+<img src="https://github.com/user-attachments/assets/a09f3eff-3e08-4a3c-b490-71117a40080b" width="420" height="80"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="420" height="90" alt="image" src="https://github.com/user-attachments/assets/4ac93e8c-4848-472e-ae13-2bd858811b48" />
 
 A comprehensive Terraform module for creating and managing GitLab groups with full support for security settings, access controls, and organizational features.
 
