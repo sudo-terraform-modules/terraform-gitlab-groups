@@ -20,33 +20,6 @@ terraform {
   required_version = ">= 1.3.0"
 
   required_providers {
-    # AWS PROVIDER CONFIGURATION
-    # =========================
-    aws = {
-      source = "hashicorp/aws"
-      
-      # VERSION CONSTRAINT EXPLANATION:
-      # "~> 6.0" means >= 6.0.0 AND < 7.0.0 (pessimistic constraint)
-      # This allows:
-      #   6.0.0, 6.1.0, 6.23.0, 6.99.999 (patch and minor updates within v6.x)
-      # This prevents:
-      #   7.0.0, 8.0.0 (major updates that will introduce breaking changes)
-      #
-      # ALTERNATIVE CONSTRAINT OPTIONS:
-      # -------------------------------
-      # "= 6.23.0"           → Exact version (most restrictive, good for critical production)
-      # ">= 6.0.0"           → Minimum version (least restrictive, risky for breaking changes)
-      # "~> 6.23"            → Allow patch updates only (6.23.x but not 6.24.x)
-      # ">= 6.0.0, < 7.0.0"  → Range constraint (explicit about major version boundary)
-      # "~> 6.20"            → Conservative approach (allows minor updates from 6.20.x)
-      #
-      # RECOMMENDED APPROACH FOR MODULES:
-      # Use "~> 6.0" for modules to allow all stable v6.x updates
-      # This provides access to bug fixes and new features while preventing major breaking changes
-      # Consider "~> 6.20" or higher for production modules to avoid early v6.x instability
-      version = "~> 6.0"
-    }
-
     # GITLAB PROVIDER CONFIGURATION  
     # =============================
     gitlab = {
