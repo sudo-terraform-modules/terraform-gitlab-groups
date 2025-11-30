@@ -24,47 +24,14 @@ provider "gitlab" {
 # BASIC GROUPS
 # ==============================================================================
 
-# Simple development group
-module "development_group" {
-  source = "../"
-
-  name        = "Development Team"
-  path        = "development"
-  description = "Main development team for all projects"
-
-  # Basic settings
-  visibility_level        = "private"
-  project_creation_level  = "developer"
-  subgroup_creation_level = "maintainer"
-
-  # Enable useful features
-  lfs_enabled         = true
-  auto_devops_enabled = true
-}
-
-# QA/Testing group
-module "qa_group" {
-  source = "../"
-
-  name        = "Quality Assurance"
-  path        = "qa"
-  description = "Quality assurance and testing team"
-
-  visibility_level       = "private"
-  project_creation_level = "maintainer"
-
-  # QA specific settings
-  shared_runners_setting = "enabled"
-  lfs_enabled            = true
-}
-
 # ==============================================================================
 # NESTED GROUPS (SUBGROUPS)
 # ==============================================================================
 
 # Main engineering parent group
 module "engineering_group" {
-  source = "../"
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
 
   name        = "Engineering"
   path        = "engineering"
@@ -81,43 +48,10 @@ module "engineering_group" {
   lfs_enabled                  = true
 }
 
-# Backend engineering subgroup
-module "backend_team" {
-  source = "../"
-
-  name        = "Backend Team"
-  path        = "backend"
-  description = "Backend development team"
-  parent_id   = module.engineering_group.id
-
-  # Inherit from parent but more restrictive
-  visibility_level       = "private"
-  project_creation_level = "developer"
-
-  # Backend specific features
-  lfs_enabled = true
-}
-
-# Frontend engineering subgroup
-module "frontend_team" {
-  source = "../"
-
-  name        = "Frontend Team"
-  path        = "frontend"
-  description = "Frontend development team"
-  parent_id   = module.engineering_group.id
-
-  visibility_level       = "private"
-  project_creation_level = "developer"
-
-  # Frontend specific settings
-  auto_devops_enabled = true
-  lfs_enabled         = false # Frontend typically doesn't need LFS
-}
-
 # DevOps subgroup
 module "devops_team" {
-  source = "../"
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
 
   name        = "DevOps Team"
   path        = "devops"
@@ -134,12 +68,195 @@ module "devops_team" {
 }
 
 # ==============================================================================
+# DEVOPS SUBGROUPS
+# ==============================================================================
+
+# Migrations team subgroup
+module "migrations_team" {
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
+
+  name        = "Migrations Team"
+  path        = "migrations"
+  description = "Database and application migration team"
+  parent_id   = module.devops_team.id
+
+  visibility_level       = "private"
+  project_creation_level = "developer"
+
+  # Migration specific settings
+  lfs_enabled                  = true
+  shared_runners_setting       = "enabled"
+  shared_runners_minutes_limit = 15000
+}
+
+# Infrastructure team subgroup
+module "infrastructure_team" {
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
+
+  name        = "Infrastructure Team"
+  path        = "infrastructure"
+  description = "Cloud and on-premises infrastructure management"
+  parent_id   = module.devops_team.id
+
+  visibility_level       = "private"
+  project_creation_level = "developer"
+
+  # Infrastructure specific settings
+  lfs_enabled                  = true
+  shared_runners_setting       = "enabled"
+  shared_runners_minutes_limit = 20000
+  auto_devops_enabled          = true
+}
+
+# Automation team subgroup
+module "automation_team" {
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
+
+  name        = "Automation Team"
+  path        = "automation"
+  description = "DevOps automation and CI/CD pipelines"
+  parent_id   = module.devops_team.id
+
+  visibility_level       = "private"
+  project_creation_level = "developer"
+
+  # Automation specific settings
+  auto_devops_enabled          = true
+  shared_runners_setting       = "enabled"
+  shared_runners_minutes_limit = 25000
+  lfs_enabled                  = true
+}
+
+# Compute team subgroup
+module "compute_team" {
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
+
+  name        = "Compute Team"
+  path        = "compute"
+  description = "Server and container compute infrastructure"
+  parent_id   = module.devops_team.id
+
+  visibility_level       = "private"
+  project_creation_level = "developer"
+
+  # Compute specific settings
+  lfs_enabled                  = true
+  shared_runners_setting       = "enabled"
+  shared_runners_minutes_limit = 18000
+}
+
+# SAP BASIS team subgroup
+module "sap_basis_team" {
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
+
+  name        = "SAP BASIS Team"
+  path        = "sap-basis"
+  description = "SAP system administration and BASIS management"
+  parent_id   = module.devops_team.id
+
+  visibility_level       = "private"
+  project_creation_level = "maintainer"
+
+  # SAP BASIS specific settings
+  lfs_enabled                  = true
+  shared_runners_setting       = "disabled_and_overridable" # SAP may need custom runners
+  shared_runners_minutes_limit = 10000
+}
+
+# ==============================================================================
+# SAP BASIS SUBGROUPS
+# ==============================================================================
+
+# SAP S/4HANA team subgroup
+module "sap_s4hana_team" {
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
+
+  name        = "SAP S4 HANA"
+  path        = "sap-s4hana"
+  description = "SAP S/4HANA system administration and development"
+  parent_id   = module.sap_basis_team.id
+
+  visibility_level       = "private"
+  project_creation_level = "maintainer"
+
+  # S/4HANA specific settings
+  lfs_enabled                  = true
+  shared_runners_setting       = "disabled_and_overridable"
+  shared_runners_minutes_limit = 8000
+
+  # Strict security for production SAP systems
+  require_two_factor_authentication = true
+  two_factor_grace_period           = 72
+}
+
+# SAP Business One team subgroup
+module "sap_b1_team" {
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
+
+  name        = "SAP B1"
+  path        = "sap-b1"
+  description = "SAP Business One system administration and customization"
+  parent_id   = module.sap_basis_team.id
+
+  visibility_level       = "private"
+  project_creation_level = "maintainer"
+
+  # Business One specific settings
+  lfs_enabled                  = true
+  shared_runners_setting       = "disabled_and_overridable"
+  shared_runners_minutes_limit = 5000
+
+  # Security settings
+  require_two_factor_authentication = true
+  two_factor_grace_period           = 72
+}
+
+# SAP NetWeaver team subgroup
+module "sap_netweaver_team" {
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
+
+  name        = "SAP NetWeaver"
+  path        = "sap-netweaver"
+  description = "SAP NetWeaver platform administration and ABAP development"
+  parent_id   = module.sap_basis_team.id
+
+  visibility_level       = "private"
+  project_creation_level = "maintainer"
+
+  # NetWeaver specific settings
+  lfs_enabled                  = true
+  shared_runners_setting       = "disabled_and_overridable"
+  shared_runners_minutes_limit = 6000
+
+  # Security settings for ABAP development
+  require_two_factor_authentication = true
+  two_factor_grace_period           = 72
+
+  # Push rules for ABAP code quality
+  # push_rules = {
+  #   prevent_secrets        = true
+  #   commit_committer_check = true
+  #   member_check           = true
+  #   max_file_size          = 50 # ABAP objects can be large
+  # }
+}
+
+# ==============================================================================
 # SECURE GROUPS WITH ADVANCED FEATURES
 # ==============================================================================
 
 # Security team with maximum security
 module "security_group" {
-  source = "../"
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
 
   name        = "Security Team"
   path        = "security"
@@ -188,7 +305,8 @@ module "security_group" {
 
 # Production operations group
 module "production_group" {
-  source = "../"
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
 
   name        = "Production Operations"
   path        = "production"
@@ -225,7 +343,8 @@ module "production_group" {
 
 # Open source projects group
 module "opensource_group" {
-  source = "../"
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
 
   name        = "Open Source Projects"
   path        = "opensource"
@@ -254,7 +373,8 @@ module "opensource_group" {
 
 # Documentation group
 module "documentation_group" {
-  source = "../"
+  source  = "sudo-terraform-modules/groups/gitlab"
+  version = "0.2.0"
 
   name        = "Documentation"
   path        = "docs"
@@ -273,32 +393,6 @@ module "documentation_group" {
   # }
 }
 
-# Research and development group
-module "research_group" {
-  source = "../"
-
-  name        = "Research and Development"
-  path        = "research"
-  description = "Experimental projects and research initiatives"
-
-  visibility_level       = "private"
-  project_creation_level = "developer"
-
-  # R&D friendly settings
-  auto_devops_enabled = true
-  lfs_enabled         = true # For datasets and models
-
-  # Push rules require GitLab Enterprise
-  # push_rules = {
-  #   prevent_secrets = true
-  #   max_file_size  = 500 # Large files for research data
-  # }
-
-  # Generous CI/CD limits for experimentation
-  shared_runners_setting       = "enabled"
-  shared_runners_minutes_limit = 30000
-}
-
 # ==============================================================================
 # OUTPUTS FOR REFERENCE
 # ==============================================================================
@@ -306,24 +400,34 @@ module "research_group" {
 output "groups_created" {
   description = "Summary of all created groups"
   value = {
-    development = {
-      id        = module.development_group.id
-      web_url   = module.development_group.web_url
-      full_path = module.development_group.full_path
-    }
-    qa = {
-      id        = module.qa_group.id
-      web_url   = module.qa_group.web_url
-      full_path = module.qa_group.full_path
-    }
-    engineering = {
+    qa = {ering = {
       id        = module.engineering_group.id
       web_url   = module.engineering_group.web_url
       full_path = module.engineering_group.full_path
       subgroups = {
-        backend  = module.backend_team.full_path
-        frontend = module.frontend_team.full_path
         devops   = module.devops_team.full_path
+      }
+    }
+    devops = {
+      id        = module.devops_team.id
+      web_url   = module.devops_team.web_url
+      full_path = module.devops_team.full_path
+      subgroups = {
+        migrations     = module.migrations_team.full_path
+        infrastructure = module.infrastructure_team.full_path
+        automation     = module.automation_team.full_path
+        compute        = module.compute_team.full_path
+        sap_basis      = module.sap_basis_team.full_path
+      }
+    }
+    sap_basis = {
+      id        = module.sap_basis_team.id
+      web_url   = module.sap_basis_team.web_url
+      full_path = module.sap_basis_team.full_path
+      subgroups = {
+        s4_hana      = module.sap_s4hana_team.full_path
+        business_one = module.sap_b1_team.full_path
+        netweaver    = module.sap_netweaver_team.full_path
       }
     }
     security = {
@@ -346,10 +450,6 @@ output "groups_created" {
       web_url   = module.documentation_group.web_url
       full_path = module.documentation_group.full_path
     }
-    research = {
-      id        = module.research_group.id
-      web_url   = module.research_group.web_url
-      full_path = module.research_group.full_path
-    }
   }
+}
 }
